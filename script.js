@@ -77,13 +77,93 @@ const displayMovements=function(movements){
   });
 }
 displayMovements(account3.movements)
-
+let balance;
 const calcPrintBalance=function(movements){
-  const balance=movements.reduce((acc,mov)=>acc+mov,0);
-  labelBalance.textContent=`${balance}EUR`;
+  balance=movements.reduce((acc,mov)=>acc+mov,0);
+  labelBalance.textContent=`${balance}€`;
 };
 calcPrintBalance(account1.movements)
+ 
+const inoutBalance=function(account){
+  const inBalance=account.movements.filter(mov=>mov>0)
+  .reduce((acc,mov)=>acc+mov,0);
+  // console.log(inBalance)
+  labelSumIn.textContent=`${inBalance}€`
+  const outBalance=account.movements.filter(mov=>mov<0)
+  .reduce((acc,mov)=>acc+mov,0);
+  // console.log(outBalance)
+  labelSumOut.textContent=`${Math.abs(outBalance)}€`;
+  const intBalance=account.movements.filter(mov=>mov>0).map(mov=>mov*account.interestRate/100,).filter(mov=>mov>1).reduce((acc,mov)=>mov+acc,0)
+  labelSumInterest.textContent=`${intBalance}€`
+  // console.log(intBalance)
+}
+const updateUI=function(customerAccount){
+  displayMovements(customerAccount.movements);
+  inoutBalance(customerAccount);
+  calcPrintBalance(customerAccount.movements);
 
+}
+
+let customerAccount;
+btnLogin.addEventListener('click',function(e){
+  e.preventDefault();
+  customerAccount=accounts.find(acc=>acc.username===inputLoginUsername.value);
+
+  if (customerAccount?.pin == Number(inputLoginPin.value)){
+    containerApp.style.opacity=100;
+    labelWelcome.textContent=`Welcome back ${customerAccount.owner.split(' ')[0]}`
+    updateUI(customerAccount);
+    inputLoginUsername.value='';
+    inputLoginPin.value='';
+    inputLoginPin.blur();
+  }
+})
+
+btnClose.addEventListener('click',function(e){
+  e.preventDefault();
+  if (inputCloseUsername.value==customerAccount.username && Number(inputClosePin.value)==customerAccount.pin){
+    const accIndex=accounts.findIndex(cur=>cur.username===customerAccount.username);
+    // console.log(accIndex);
+    accounts.splice(accIndex,1);
+    inputCloseUsername.value='';
+    inputClosePin.value='';
+    containerApp.style.opacity=0;
+    
+  }
+})
+
+btnLoan.addEventListener('click',function(e){
+  e.preventDefault();
+  const amount=Number(inputLoanAmount.value);
+  if (amount>0 && customerAccount.movements.some(mov=>amount*0.1<=mov)){
+  customerAccount.movements.push(amount);
+  updateUI(customerAccount);
+  inputLoanAmount.value='';
+
+}
+})
+
+btnTransfer.addEventListener('click',function(e){
+  e.preventDefault();
+  const transferAmount= Number(inputTransferAmount.value);
+  const receiverAcc=accounts.find(acc=>acc.username==inputTransferTo.value);
+  inputTransferAmount.value='';
+  inputTransferTo.value=''
+  if (transferAmount>0 && 
+    receiverAcc &&
+    receiverAcc?.username!==customerAccount.username &&
+    transferAmount<= balance)
+    {
+    //negative push to movement
+    customerAccount.movements.push(-transferAmount);
+
+    //positive push to recipient
+    receiverAcc.movements.push(transferAmount);
+    //update ui
+      updateUI(customerAccount);
+    
+  }
+})
 /////////////////////////////////////////////////
 /////////////////////////////////////////////////
 // LECTURES
@@ -95,14 +175,13 @@ const currencies = new Map([
 ]);
 
 const movements = [200, 450, -400, 3000, -650, -130, 70, 1300];
-console.log(account1.owner);
 const array=account1.owner; 
 let collect='';
 const splitstring=array.split(' ')
 array.split(' ').map(function(ele){
   collect+=ele[0]
 });
-console.log(collect.toLowerCase())
+
 
 
 // const strings='Shaily Priyadarshini';
@@ -117,6 +196,7 @@ const createUserName=function(user){
 accounts.forEach(function(acc){
   acc.username=createUserName(acc.owner);
 })
+
 
 // console.log(createUserName('Shaily Priyadarshini'))
 ////////////////////////////////////////////////
