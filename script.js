@@ -62,9 +62,11 @@ const inputCloseUsername = document.querySelector('.form__input--user');
 const inputClosePin = document.querySelector('.form__input--pin');
 
 
-const displayMovements=function(movements){
+const displayMovements=function(movements,sorted){
   containerMovements.innerHTML='';
-  movements.forEach(function(mov,i){
+  const movs=sorted ? movements.slice().sort((a,b) => a-b) : movements;
+  
+  movs.forEach(function(mov,i){
     const type=mov>0?'deposit':'withdrawal';
     const html=`
     <div class="movements__row">
@@ -76,13 +78,13 @@ const displayMovements=function(movements){
   containerMovements.insertAdjacentHTML('afterbegin',html);
   });
 }
-displayMovements(account3.movements)
+// displayMovements(account3.movements)
 let balance;
 const calcPrintBalance=function(movements){
   balance=movements.reduce((acc,mov)=>acc+mov,0);
   labelBalance.textContent=`${balance}€`;
 };
-calcPrintBalance(account1.movements)
+// calcPrintBalance(account1.movements)
  
 const inoutBalance=function(account){
   const inBalance=account.movements.filter(mov=>mov>0)
@@ -163,6 +165,13 @@ btnTransfer.addEventListener('click',function(e){
       updateUI(customerAccount);
     
   }
+})
+sorted=false
+btnSort.addEventListener('click',function(){
+  e.preventDefault();
+  displayMovements(customerAccount.movements,!sorted);
+  sorted=!sorted;
+
 })
 /////////////////////////////////////////////////
 /////////////////////////////////////////////////
