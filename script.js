@@ -166,8 +166,8 @@ btnTransfer.addEventListener('click',function(e){
     
   }
 })
-sorted=false
-btnSort.addEventListener('click',function(){
+let sorted=false
+btnSort.addEventListener('click',function(e){
   e.preventDefault();
   displayMovements(customerAccount.movements,!sorted);
   sorted=!sorted;
